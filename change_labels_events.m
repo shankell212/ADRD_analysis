@@ -12,7 +12,7 @@ close all
 
 %% Set paths and load in data
 
-sub = '05';    % CHANGE  
+sub = '04';    % CHANGE  
 
 filePaths.baseDir = '/projectnb/nphfnirs/s/datasets/U01_ADRD/';  % CHANGE 
 
@@ -73,81 +73,8 @@ for j = 1:numFiles
             disp(events);
         end
 
+    end
 
-    else
-        disp('Events file does not exist, creating events table to edit');
-        
-        % Create events table to edit
-        onset = [];  % Initialize empty arrays
-        duration = [];
-        amplitude = [];
-        trial_type = [];
-        
-        % Loop through the stimuli
-        for i = 1:length(snirf.stim)
-            stim_data = snirf.stim(i).data; % Extract onset, duration, amplitude
-            num_trials = size(stim_data, 1);
-            
-            % Append to the arrays
-            onset = [onset; stim_data(:,1)];
-            duration = [duration; stim_data(:,2)];
-            amplitude = [amplitude; stim_data(:,3)];
-            trial_type = [trial_type; repmat(str2double(snirf.stim(i).name), num_trials, 1)];
-        end
-        events.trial_type = cell(length(trial_type), 1); % Preallocate as a cell array
-        % Create the table
-        events = table(onset, duration, amplitude, trial_type);
-        
-        % Display the table
-        disp(events);
-    
-    end
-    
-    % if no stims, skip current task
-    if isempty(events)
-        disp(['No stims recorded for task ', files(j).name, ' Cannot create events.tsv.'])
-        continue
-    end
-    
-    %%
-    
-    orignames={'1','2'};  % in 1st 2 subs, 2=ExpAnswer 3=ControlAnswer
-    
-    % new names 
-    newnames={'ControlAnswer','ExpAnswer'};   % 1 = control and 2 = exp for all subs 6+
-    
-    %specify the duration of each stim type
-    lengths=[20, 20];  % CHECK IF THIS THE CURRECT DURATION 
-    
-    
-    %% modify
-    
-    N=length(snirf.stim);
-    
-    %%
-    n = length(events.trial_type);
-    %events_table.trial_type = cell(height(events_table), 1); % Preallocate as a cell array
-    
-    % convert to cell
-    if isnumeric(events.trial_type)
-        events.trial_type = cellstr(num2str(events.trial_type)); % Convert numbers to cell array of strings
-    end
-    %
-    for ki=1:n
-        
-        temp=events.trial_type;
-        indice=find(contains(orignames,temp(ki)));
-    
-        %events_table.trial_type(ki) = [];
-        events.trial_type(ki) = {newnames{indice}};
-        
-        if ismember('duration', events.Properties.VariableNames)
-            events.duration(ki) = lengths(indice);
-        else
-            events.Duration(ki) = lengths(indice);
-        end
-    
-    end
     %%
     if ismember('Duration', events.Properties.VariableNames)
         events = renamevars(events, 'Duration', 'duration');
@@ -158,11 +85,15 @@ for j = 1:numFiles
     if ismember('Trial_type', events.Properties.VariableNames)
         events = renamevars(events, 'Trial_type', 'trial_type');
     end
-    events.trial_type = string(events.trial_type);
 
     %%
     if ismember('Amplitude', events.Properties.VariableNames)
         events = renamevars(events, 'Amplitude', 'value');
+    end
+
+    %%
+    if ismember('amplitude', events.Properties.VariableNames)
+        events = renamevars(events, 'amplitude', 'value');
     end
     
     %%
@@ -175,6 +106,5 @@ for j = 1:numFiles
     writetable(events, filePaths.events, 'FileType', 'text', 'Delimiter', '\t');
     disp('events.tsv file created successfully.');
 
+
 end
-
-

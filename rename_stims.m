@@ -7,13 +7,13 @@ clear
 clc
 close all
 
-% cd '/projectnb/nphfnirs/ns/lcarlton/Homer3/' % CHANGE 
+% cd '/projectnb/nphfnirs/s/code/Homer3/' % CHANGE 
 % setpaths
 
 %% Set paths and load in data
 
-sub = '01';    % CHANGE  
-task = 'Cloudy'; % CHANGE 
+sub = '02';    % CHANGE  
+task = 'Presto'; % CHANGE 
 run = '01';
 
 filePaths.baseDir = '/projectnb/nphfnirs/s/datasets/U01_ADRD/';
@@ -130,21 +130,29 @@ for ki=1:n
     temp=events.trial_type;
     indice=find(contains(orignames,temp(ki)));
 
-    %events_table.trial_type(ki) = [];
     events.trial_type(ki) = {newnames{indice}};
     
     if ismember('duration', events.Properties.VariableNames)
-        events.duration(ki) = lengths(indice);
-    else
-        events.Duration(ki) = lengths(indice);
+        events = renamevars(events, 'Duration', 'duration');
     end
+events.duration(ki) = lengths(indice);
+
 
 end
 %%
 if ismember('Trial_type', events.Properties.VariableNames)
-    events.Trial_type = string(events.Trial_type);
-else
-    events.trial_type = string(events.trial_type);
+    events = renamevars(events, 'Trial_type', 'trial_type');
+end
+events.trial_type = string(events.trial_type);
+
+%%
+if ismember('Amplitude', events.Properties.VariableNames)
+    events = renamevars(events, 'Amplitude', 'value');
+end
+
+%%
+if ismember('Onset', events.Properties.VariableNames)
+    events = renamevars(events, 'Onset', 'onset');
 end
 
 %% save data

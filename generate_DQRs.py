@@ -24,7 +24,7 @@ import pandas as pd
 from math import ceil
 
 import sys
-sys.path.append('/projectnb/nphfnirs/s/datasets/U01_ADRD/code/modules')
+sys.path.append('/projectnb/nphfnirs/s/datasets/U01_ADRD/code/ADRD_analysis/modules')
 import module_plot_DQR as dqr
 import module_load_and_preprocess as preproc
 

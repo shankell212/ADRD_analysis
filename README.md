@@ -26,7 +26,7 @@ Preprocessing Scheme (updated for auto)
 2) Run the following commands:
   2.2) module load miniconda
   2.3) conda activate cedalion
-  2.4) cd /projectnb/nphfnirs/s/datasets/U01_ADRD/code
+  2.4) cd /projectnb/nphfnirs/s/datasets/U01_ADRD/code/ADRD_analysis/
   
   2.5) python3 -c "from generate_DQRs import run_DQR_all_tasks; run_DQR_all_tasks( subj = '06', task_lst = ['Cloudy', 'GEN1', 'GEN2', 'PERS1', 'PERS2', 'Presto'], snr_thresh=10, sd_thresh= [0, 45], amp_thresh=[0, 1e7])"
 
