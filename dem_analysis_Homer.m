@@ -17,8 +17,8 @@
 clear all 
 clc
 
-cd '/projectnb/nphfnirs/ns/lcarlton/Homer3/'
-setpaths
+% cd '/projectnb/nphfnirs/s/code/Homer3/'
+% setpaths
 
 %%
 cfg.prune.SDrange = [0, 45]; % acceptable range of SD distances
@@ -29,29 +29,28 @@ cfg.spline.p = 0.99; % degree of spline function
 cfg.spline.FrameSize_sec = 10;
 turnOn = 1;
 
-cfg.bandpassfilt.fmin = 0;
-cfg.bandpassfilt.fmax = 0.5;
+cfg.bandpassfilt.fmin = 0;   % 0 if we are doing drift correction  -- 0.01 otherwise
+cfg.bandpassfilt.fmax = 0.5;  
 
 cfg.glm.trange = [-2,25];       % time range for HRF 
 cfg.glm.glmSolveMethod = 1;     % ordinary least squares method
 cfg.glm.idxBasis = 1;           % type of basis func for HRD (1= sequence of Gaussian functions)
 cfg.glm.paramsBasis = [1,1];    % params for basis function, specifies width of of Gauss and step btwn each
 cfg.glm.rhoSD_ssThresh = 15;     % max distance for short sep regression (mm) -- WHY 20 AND NOT 10?
-cfg.glm.flagNuisanceRMethod = 1; % uses most correlated SS channel for short sep regression
+cfg.glm.flagNuisanceRMethod = 2; % 1 - uses most correlated SS channel for short sep regression, 3=2 - uses average of all SS chans
 cfg.glm.driftOrder = 3;          % 3rd order polynomial for drift correction
 cfg.glm.c_vector = 0;           
 
 %% 1. load the data
 
-subject_list = ["02"];
+subject_list = ["01", "02", "03", "04", "05", "06"];
 
 run_num = 1;
-task = "CloudyCB";
-%nTask = 2; % num tasks (or stims ?)
+task = "GEN1"; 
 
-filePaths.baseDir_data = "/projectnb/nphfnirs/ns/Shannon/Dementia_project/Data/";
+filePaths.baseDir_data = "/projectnb/nphfnirs/s/datasets/U01_ADRD/";
 
-filePaths.probe = "/projectnb/nphfnirs/ns/Shannon/Dementia_project/Code/probe.SD";
+filePaths.probe = "/projectnb/nphfnirs/s/datasets/U01_ADRD/code/corrected_probe.SD";
 
 for ss = 1:length(subject_list) 
     subj = subject_list(ss);
@@ -59,7 +58,7 @@ for ss = 1:length(subject_list)
     
     run = char(join(['sub-', subj, '_task-', task, '_run-0', num2str(run_num), '_nirs'],''));
 
-    filePaths.subjDir = char(join([filePaths.baseDir_data, 'sub-', subj, '/'],''));
+    filePaths.subjDir = char(join([filePaths.baseDir_data, 'sub-', subj, '/nirs/'],''));
     
     filePaths.snirf = char(join([filePaths.subjDir, run, '.snirf'],''));
 
@@ -117,12 +116,12 @@ for ss = 1:length(subject_list)
     data_obj.data = data_yavg_plotprobe;
     
     % pass data_obj as an argument to PlotProbe2
-    PlotProbe2(data_obj)
+    %PlotProbe2(data_obj)
 
 end
 
 %% average data_yavg over subjects then call plotProbe2
-%{
+%
 data_yavg_subjavg = data_yavg.copy();
 data_yavg_subjavg.dataTimeSeries = zeros(size(data_yavg.dataTimeSeries));
 
