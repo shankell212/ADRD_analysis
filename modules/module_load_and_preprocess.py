@@ -344,23 +344,23 @@ def pruneChannels( rec, cfg_prune ):
     chs_pruned = xr.DataArray(np.zeros(rec['amp'].shape[0]), dims=["channel"], coords={"channel": rec['amp'].channel})
 
     #i initialize chs_pruned to 0.4
-    chs_pruned[:] = 0.4
+    chs_pruned[:] = 0.58      # good snr   # was 0.4
 
     # get indices for where snr_mask = false
     snr_mask_false = np.where(snr_mask == False)[0]
-    chs_pruned[snr_mask_false] = 0.19 # poor snrf channels
+    chs_pruned[snr_mask_false] = 0.4 # poor snr channels      # was 0.19
 
     # get indices for where amp_mask_sat = false
     amp_mask_false = np.where(amp_mask_sat == False)[0]
-    chs_pruned[amp_mask_false] = 0.0 # saturated channels
+    chs_pruned[amp_mask_false] = 0.92 # saturated channels  # was 0.0
 
     # get indices for where amp_mask_low = false
     amp_mask_false = np.where(amp_mask_low == False)[0]
-    chs_pruned[amp_mask_false] = 0.8 # low signal channels
+    chs_pruned[amp_mask_false] = 0.24  # low signal channels    # was 0.8
 
     # get indices for where sd_mask = false
     sd_mask_false = np.where(sd_mask == False)[0]
-    chs_pruned[sd_mask_false] = 0.65 # SDS channels
+    chs_pruned[sd_mask_false] = 0.08 # SDS channels    # was 0.65
 
 
     # put all masks in a list
@@ -407,9 +407,10 @@ def pruneChannels( rec, cfg_prune ):
     rec['amp_pruned'] = perc_time_pruned
 
     # modify xarray of channel labels with value of 0.95 for channels that are pruned by SCI and/or PSP
-    chs_pruned.loc[drop_list] = 0.95
+    chs_pruned.loc[drop_list] = 0.76     # was 0.95
 
     return rec, chs_pruned, sci, psp
+
 
 
 def GLM(rec, rec_str, cfg_GLM):

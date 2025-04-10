@@ -24,7 +24,9 @@ def plotDQR( rec = None, chs_pruned = None, cfg_preprocess = None, filenm = None
 
     f, ax = p.subplots(3, 2, figsize=(11, 14))
 
+    #
     # Plot GVTD
+    # 
     ax[0][0].plot( rec.aux_ts["gvtd"].time, rec.aux_ts["gvtd"], color='b', label="GVTD")
     if 'gvtd_corrected' in rec.aux_ts.keys():
         ax[0][0].plot( rec.aux_ts["gvtd"].time, rec.aux_ts["gvtd_corrected"], color='#ff4500', label="GVTD corrected")
@@ -36,6 +38,7 @@ def plotDQR( rec = None, chs_pruned = None, cfg_preprocess = None, filenm = None
         thresh_corrected = quality._get_gvtd_threshold(rec.aux_ts['gvtd_corrected'], 'histogram_mode', n_std = 10)
         ax[0][0].axhline(thresh_corrected.values, color='#ff4500', linestyle='--', label=f'Thresh {thresh_corrected:.1e}')
     ax[0][0].legend()
+    ax[0][0].set_ylim(0, 3*thresh)
 
     stim = rec.stim.copy()
     if stim_lst_str is not None:
@@ -45,27 +48,40 @@ def plotDQR( rec = None, chs_pruned = None, cfg_preprocess = None, filenm = None
     labels.append(stim_lst_str)
     ax[0][0].legend(handles, labels)
 
-
+    #
     # Plot the pruned channels
-    idx_good = np.where(chs_pruned.values == 0.4)[0]
+    #
+    # create cmap
+    
+    colors = ['cyan', 'blue', (1,0.9,0.4), (0.3, 1, 0.3), 'magenta', 'red']  # Change these colors if needed
+    bounds = [0, 0.16, 0.32, 0.48, 0.68, 0.84, 1]
+    
+    cmap = clrs.ListedColormap(colors)
+    norm = clrs.BoundaryNorm(bounds, cmap.N)
+        
+    cb_ticks_labels = [(0.08,'SDS'), (0.24,'Low Signal'), (0.4,'Poor SNR'), (0.58,'Good SNR'), (0.76,'SCI/PSP'), (0.92,'Saturated')]
+
+    idx_good = np.where(chs_pruned.values == 0.58)[0]
     plots.scalp_plot( 
             rec["amp"],
             rec.geo3d,
             chs_pruned,
             ax[0][1],
-            cmap='gist_rainbow',
+            cmap=cmap, #'gist_rainbow',
+            norm=norm,
             vmin=0,
             vmax=1,
             optode_labels=False,
             title=f"Pruned Channels {(len(chs_pruned)-len(idx_good))/len(chs_pruned)*100:.1f}%",
-            optode_size=6
+            optode_size=6,
+            cb_ticks_labels = cb_ticks_labels
         )
     
     
+    #
     # plot variance of OD along time axis for wavelength 1 (post corrected) 
-    # !!! will want to make more modular by allowing any od rec_str in future
+    #
     ax1 = ax[1][0]
-    #pdb.set_trace()
     variance_vals = np.log10( rec['od_corrected'].values.var(axis=2))
     variance_vals_da = xr.DataArray(variance_vals, dims=["channel", "wavelength"], coords={"channel": rec["od"].channel, "wavelength": rec["od"].wavelength})
     max_variance = np.nanmax(variance_vals)
@@ -84,7 +100,9 @@ def plotDQR( rec = None, chs_pruned = None, cfg_preprocess = None, filenm = None
             optode_size=6
         )
     
+    #
     # plot variance of OD along time axis for wavelength 2 (post correction) 
+    #
     ax1 = ax[1][1]
     variance_vals = np.log10( rec['od_corrected'].values.var(axis=2))
     variance_vals_da = xr.DataArray(variance_vals, dims=["channel", "wavelength"], coords={"channel": rec["od"].channel, "wavelength": rec["od"].wavelength})
@@ -104,7 +122,9 @@ def plotDQR( rec = None, chs_pruned = None, cfg_preprocess = None, filenm = None
             optode_size=6
         )
 
+    #
     # Plot SNR (for wav 1)
+    #
     ax1 = ax[2][0]
     snr_thresh = cfg_preprocess['cfg_prune']['snr_thresh']
     snr, snr_mask = quality.snr(rec['amp'], snr_thresh)
@@ -126,7 +146,9 @@ def plotDQR( rec = None, chs_pruned = None, cfg_preprocess = None, filenm = None
             optode_size=6
         )
     
+    # 
     # Plot SNR (for wav 2)
+    #
     ax1 = ax[2][1]
     snr_thresh = cfg_preprocess['cfg_prune']['snr_thresh']
     snr, snr_mask = quality.snr(rec['amp'], snr_thresh)
@@ -148,7 +170,7 @@ def plotDQR( rec = None, chs_pruned = None, cfg_preprocess = None, filenm = None
             optode_size=6
         )
 
-        
+    
     # give a title to the figure
     if cfg_preprocess['flag_prune_channels']:  # !!! add if puned or unpruned to title and file name? - matters for gvtd and variance
         flag_prune = '_pruned'
